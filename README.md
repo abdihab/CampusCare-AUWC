@@ -73,4 +73,6 @@ New signups create a student profile from the supplied registration metadata. If
 
 `/login`, `/signup`, `/dashboard`, `/report`, `/my-complaints`, `/complaint/:id`, `/notifications`, `/announcements`, `/profile`, `/admin`, `/admin/complaints`, `/admin/people`, and `/admin/departments`.
 
+The `public/_redirects` rule serves the React app for direct visits to these routes on Render. Keep it in place so refreshing or sharing a page URL does not return a 404.
+
 The frontend hides routes by role for usability. **Supabase RLS is the security boundary** and independently restricts students to their own reports and attachments, and administrators to authorized campus-wide management. Anonymous reporter names remain hidden in student-facing complaint records. Never place a service-role key in the frontend.

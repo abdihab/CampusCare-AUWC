@@ -154,34 +154,7 @@ function PageFrame({ title, children, className = '' }) {
   return <div className="app-shell"><Sidebar mobileOpen={mobileOpen} close={closeMenu} /><div className="content-area"><Header title={title} mobileNav={() => setMobileOpen(true)} /><main className={`page-content ${className}`}>{children}</main><footer className="footer"><span>© 2025 Ambo University · Woliso Campus</span><span><span className="footer-status" /> Built for a better campus <Sparkles size={13} /></span></footer></div></div>
 }
 function StatCard({ label, value, note, icon: Icon, color, trend }) {
-  const { complaints } = useCampus()
-  let visibleValue = value
-  let visibleNote = note
-  let visibleTrend = trend
-  if (label === 'Total complaints') {
-    visibleValue = String(complaints.length).padStart(2, '0')
-    visibleNote = 'All recorded reports'
-    visibleTrend = null
-  } else if (label === 'Needs attention') {
-    visibleValue = String(complaints.filter((item) => !['Resolved', 'Rejected'].includes(item.status)).length).padStart(2, '0')
-    visibleNote = 'Awaiting resolution'
-    visibleTrend = null
-  } else if (label === 'Resolved this month') {
-    const now = new Date()
-    const resolvedThisMonth = complaints.filter((item) => {
-      const date = new Date(item.resolved_at || item.updated_at || item.date)
-      return item.status === 'Resolved' && date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
-    }).length
-    visibleValue = String(resolvedThisMonth).padStart(2, '0')
-    visibleNote = 'Resolved this calendar month'
-    visibleTrend = null
-  } else if (label === 'Avg. response time') {
-    const days = complaints.filter((item) => item.resolved_at && item.created_at).map((item) => (new Date(item.resolved_at) - new Date(item.created_at)) / 86400000).filter((day) => Number.isFinite(day) && day >= 0)
-    visibleValue = days.length ? `${(days.reduce((sum, day) => sum + day, 0) / days.length).toFixed(1)}d` : '—'
-    visibleNote = days.length ? 'Average time to resolution' : 'No resolved report data yet'
-    visibleTrend = null
-  }
-  return <div className="stat-card"><div className="stat-top"><span>{label}</span><span className={`stat-icon ${color}`}><Icon size={17} /></span></div><div className="stat-number">{visibleValue}</div><div className="stat-note">{visibleTrend && <span className="trend"><ArrowUpRight size={13} />{visibleTrend}</span>}{visibleNote}</div></div>
+  return <div className="stat-card"><div className="stat-top"><span>{label}</span><span className={`stat-icon ${color}`}><Icon size={17} /></span></div><div className="stat-number">{value}</div><div className="stat-note">{trend && <span className="trend"><ArrowUpRight size={13} />{trend}</span>}{note}</div></div>
 }
 function SectionHeading({ title, action, to, children }) {
   return <div className="section-heading"><div><h2>{title}</h2>{children && <p>{children}</p>}</div>{to && <Link className="text-link" to={to}>{action || 'View all'} <ArrowRight size={15} /></Link>}</div>
@@ -475,6 +448,19 @@ function Profile() {
 function AdminPage() {
   const { complaints } = useCampus()
   const navigate = useNavigate()
+  const [now] = useState(() => new Date())
+  const resolvedThisMonth = complaints.filter((item) => {
+    if (item.status !== 'Resolved' || !item.resolved_at) return false
+    const resolvedAt = new Date(item.resolved_at)
+    return resolvedAt.getFullYear() === now.getFullYear() && resolvedAt.getMonth() === now.getMonth()
+  }).length
+  const resolutionTimes = complaints
+    .filter((item) => item.status === 'Resolved' && item.created_at && item.resolved_at)
+    .map((item) => (new Date(item.resolved_at) - new Date(item.created_at)) / 86400000)
+    .filter((days) => Number.isFinite(days) && days >= 0)
+  const averageResolutionTime = resolutionTimes.length
+    ? `${(resolutionTimes.reduce((total, days) => total + days, 0) / resolutionTimes.length).toFixed(1)}d`
+    : '—'
   const categoryTotals = Object.entries(complaints.reduce((totals, item) => {
     totals[item.category] = (totals[item.category] || 0) + 1
     return totals
@@ -499,7 +485,7 @@ function AdminPage() {
     }).length
     return { name: month.toLocaleDateString('en-US', { month: 'short' }), reports }
   })
-  return <PageFrame title="Admin overview"><div className="welcome-row admin-welcome"><div><div className="eyebrow"><span className="live-dot" />CAMPUS OPERATIONS</div><h1>CampusCare administration</h1><p>Live complaint activity for Woliso Campus.</p></div><div className="page-heading-actions"><button className="btn btn-outline" onClick={() => downloadCsv(complaints)}><Download size={16} /> Export CSV</button><button className="btn btn-outline" onClick={() => window.print()}><Printer size={16} /> Export PDF</button><Link className="btn btn-outline" to="/admin/departments"><Building2 size={16} /> Departments</Link></div></div><div className="stats-grid"><StatCard label="Total complaints" value="0" note="" icon={ClipboardList} color="blue" /><StatCard label="Needs attention" value="0" note="" icon={AlertTriangle} color="orange" /><StatCard label="Resolved this month" value="0" note="" icon={CheckCircle2} color="green" /><StatCard label="Avg. response time" value="—" note="" icon={Zap} color="violet" /></div><div className="dashboard-grid admin-grid"><section className="panel admin-chart-panel"><SectionHeading title="Complaint activity">Reports submitted over the last 6 months.</SectionHeading><div className="admin-chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data} margin={{ top: 12, right: 8, left: -15, bottom: 0 }}><defs><linearGradient id="adminGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2f71ec" stopOpacity={0.15} /><stop offset="100%" stopColor="#2f71ec" stopOpacity={0.005} /></linearGradient></defs><CartesianGrid vertical={false} stroke="#edf0f5" strokeDasharray="3 4" /><XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9aa3b2' }} axisLine={false} tickLine={false} /><YAxis tick={{ fontSize: 10, fill: '#9aa3b2' }} axisLine={false} tickLine={false} /><Tooltip /><Area type="monotone" dataKey="reports" stroke="#3678ec" strokeWidth={2.2} fill="url(#adminGradient)" /></AreaChart></ResponsiveContainer></div></section><section className="panel categories-panel"><SectionHeading title="Reports by category" /><div className="category-stats">{categoryStats.map(({ name, value, color }) => <div className="category-stat" key={name}><span><i className={`cat-dot ${color}`} />{name}</span><b>{value}%</b><div className="mini-bar"><i className={color} style={{ width: `${value}%` }} /></div></div>)}{!categoryStats.length && <div className="empty-state">No complaint data yet.</div>}</div></section></div><section className="panel admin-table-panel"><SectionHeading title="Latest complaints" to="/admin/complaints" action="View all complaints">Stay on top of the latest campus concerns.</SectionHeading><div className="table-head"><span>REPORT</span><span>PRIORITY</span><span>STATUS</span><span>UPDATED</span><span /></div><ComplaintTable items={complaints.slice(0, 4)} /></section><div className="admin-bottom"><div className="panel team-card"><div><span className="eyebrow">DEPARTMENTS</span><h3>Complaint assignments</h3></div><button className="text-link" onClick={() => navigate('/admin/departments')}>Manage departments <ArrowRight size={14} /></button><div className="team-list">{departmentStats.map(([name, count], index) => <div className="team-row" key={name}><span className={`team-avatar ${['blue', 'orange', 'violet'][index]}`}><Building2 size={16} /></span><b>{name}</b><small>{count} assigned</small><ArrowUpRight size={14} /></div>)}{!departmentStats.length && <span>No departments assigned yet.</span>}</div></div><div className="admin-insight"><span className="insight-icon"><Sparkles size={18} /></span><span className="eyebrow">CAMPUS INSIGHT</span><h3>{busiestCategory?.[0] || 'No complaints yet'}</h3><p>{busiestCategory ? `${busiestCategory[1]} complaint${busiestCategory[1] === 1 ? '' : 's'} recorded in this category.` : 'Complaint statistics will appear here as reports arrive.'}</p><Link to="/admin/complaints">Review complaints <ArrowRight size={14} /></Link></div></div></PageFrame>
+  return <PageFrame title="Admin overview"><div className="welcome-row admin-welcome"><div><div className="eyebrow"><span className="live-dot" />CAMPUS OPERATIONS</div><h1>CampusCare administration</h1><p>Live complaint activity for Woliso Campus.</p></div><div className="page-heading-actions"><button className="btn btn-outline" onClick={() => downloadCsv(complaints)}><Download size={16} /> Export CSV</button><button className="btn btn-outline" onClick={() => window.print()}><Printer size={16} /> Export PDF</button><Link className="btn btn-outline" to="/admin/departments"><Building2 size={16} /> Departments</Link></div></div><div className="stats-grid"><StatCard label="Total complaints" value={String(complaints.length).padStart(2, '0')} note="All recorded reports" icon={ClipboardList} color="blue" /><StatCard label="Needs attention" value={String(complaints.filter((item) => !['Resolved', 'Rejected'].includes(item.status)).length).padStart(2, '0')} note="Awaiting resolution" icon={AlertTriangle} color="orange" /><StatCard label="Resolved this month" value={String(resolvedThisMonth).padStart(2, '0')} note="Resolved this calendar month" icon={CheckCircle2} color="green" /><StatCard label="Avg. resolution time" value={averageResolutionTime} note={resolutionTimes.length ? `Across ${resolutionTimes.length} resolved reports` : 'No resolved report data yet'} icon={Zap} color="violet" /></div><div className="dashboard-grid admin-grid"><section className="panel admin-chart-panel"><SectionHeading title="Complaint activity">Reports submitted over the last 6 months.</SectionHeading><div className="admin-chart"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data} margin={{ top: 12, right: 8, left: -15, bottom: 0 }}><defs><linearGradient id="adminGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2f71ec" stopOpacity={0.15} /><stop offset="100%" stopColor="#2f71ec" stopOpacity={0.005} /></linearGradient></defs><CartesianGrid vertical={false} stroke="#edf0f5" strokeDasharray="3 4" /><XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9aa3b2' }} axisLine={false} tickLine={false} /><YAxis tick={{ fontSize: 10, fill: '#9aa3b2' }} axisLine={false} tickLine={false} /><Tooltip /><Area type="monotone" dataKey="reports" stroke="#3678ec" strokeWidth={2.2} fill="url(#adminGradient)" /></AreaChart></ResponsiveContainer></div></section><section className="panel categories-panel"><SectionHeading title="Reports by category" /><div className="category-stats">{categoryStats.map(({ name, value, color }) => <div className="category-stat" key={name}><span><i className={`cat-dot ${color}`} />{name}</span><b>{value}%</b><div className="mini-bar"><i className={color} style={{ width: `${value}%` }} /></div></div>)}{!categoryStats.length && <div className="empty-state">No complaint data yet.</div>}</div></section></div><section className="panel admin-table-panel"><SectionHeading title="Latest complaints" to="/admin/complaints" action="View all complaints">Stay on top of the latest campus concerns.</SectionHeading><div className="table-head"><span>REPORT</span><span>PRIORITY</span><span>STATUS</span><span>UPDATED</span><span /></div><ComplaintTable items={complaints.slice(0, 4)} /></section><div className="admin-bottom"><div className="panel team-card"><div><span className="eyebrow">DEPARTMENTS</span><h3>Complaint assignments</h3></div><button className="text-link" onClick={() => navigate('/admin/departments')}>Manage departments <ArrowRight size={14} /></button><div className="team-list">{departmentStats.map(([name, count], index) => <div className="team-row" key={name}><span className={`team-avatar ${['blue', 'orange', 'violet'][index]}`}><Building2 size={16} /></span><b>{name}</b><small>{count} assigned</small><ArrowUpRight size={14} /></div>)}{!departmentStats.length && <span>No departments assigned yet.</span>}</div></div><div className="admin-insight"><span className="insight-icon"><Sparkles size={18} /></span><span className="eyebrow">CAMPUS INSIGHT</span><h3>{busiestCategory?.[0] || 'No complaints yet'}</h3><p>{busiestCategory ? `${busiestCategory[1]} complaint${busiestCategory[1] === 1 ? '' : 's'} recorded in this category.` : 'Complaint statistics will appear here as reports arrive.'}</p><Link to="/admin/complaints">Review complaints <ArrowRight size={14} /></Link></div></div></PageFrame>
 }
 function PeoplePage() {
   const [people, setPeople] = useState([])
