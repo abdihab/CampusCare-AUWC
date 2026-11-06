@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, ArrowUpRight, Bell, BookOpen, Building2, Check,
   CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardList,
   Clock3, Download, Filter, Flag, Globe2, GraduationCap, ImagePlus,
-  FileUp, Printer,
+  FileUp, MapPin, Printer,
   LayoutDashboard, LifeBuoy, LogOut, Menu, MessageSquare, MoreHorizontal, Plus,
   Search, Send, ShieldCheck, Sparkles, Sun, Moon,
   UserRound, Users, Wifi, X, Zap, AlertTriangle, Star,
@@ -641,6 +641,79 @@ function AuthPage({ signup = false }) {
     </div>
   </div>
 }
+function LandingPage() {
+  const { user } = useCampus()
+  const [year] = useState(() => new Date().getFullYear())
+  const startPath = user ? '/dashboard' : '/signup'
+  const signInPath = user ? '/dashboard' : '/login'
+  return <div className="landing-page">
+    <header className="landing-header">
+      <div className="landing-nav">
+        <Brand />
+        <nav className="landing-links" aria-label="Landing page navigation">
+          <a href="#features">What you can do</a>
+          <a href="#how-it-works">How it works</a>
+        </nav>
+        <div className="landing-actions">
+          <Link className="landing-signin" to={signInPath}>{user ? 'My workspace' : 'Sign in'}</Link>
+          <Link className="btn btn-primary landing-cta" to={startPath}>{user ? 'Open dashboard' : 'Get started'} <ArrowRight size={15} /></Link>
+        </div>
+      </div>
+    </header>
+    <main>
+      <section className="landing-hero">
+        <div className="landing-hero-inner">
+          <div className="landing-hero-copy">
+            <span className="landing-eyebrow"><span className="live-dot" /> AMBO UNIVERSITY · WOLISO CAMPUS</span>
+            <h1>Your campus.<br /><span>Your voice.</span><br />Better together.</h1>
+            <p>See something on campus that needs attention? Tell us about it, follow its progress, and help make Woliso Campus better for everyone.</p>
+            <div className="landing-hero-actions">
+              <Link className="btn btn-primary landing-main-cta" to={startPath}>Report an issue <ArrowRight size={16} /></Link>
+              <a className="landing-secondary-cta" href="#how-it-works"><span><ArrowRight size={14} /></span> See how it works</a>
+            </div>
+            <div className="landing-trust"><ShieldCheck size={16} /><span>Private, student-first reporting</span><i /> <span>Updates you can follow</span></div>
+          </div>
+          <div className="landing-visual" aria-label="Example of a campus issue report and its progress">
+            <div className="landing-orbit landing-orbit-one" /><div className="landing-orbit landing-orbit-two" />
+            <div className="landing-visual-label"><span className="landing-visual-dot" /> A CAMPUS THAT WORKS BETTER</div>
+            <div className="landing-report-card">
+              <div className="landing-report-top"><span className="landing-report-icon"><Wifi size={18} /></span><span className="landing-report-id">SAMPLE REPORT <b>· CC-2026-0142</b></span><MoreHorizontal size={17} /></div>
+              <h2>Wi-Fi connection in the library</h2>
+              <p>Library study hall <span>·</span> Submitted just now</p>
+              <div className="landing-report-divider" />
+              <div className="landing-progress-heading"><span>Report progress</span><span className="landing-review-badge"><i /> Under review</span></div>
+              <div className="landing-progress-track"><i /></div>
+              <div className="landing-progress-steps"><span className="complete">Submitted</span><span className="current">Under review</span><span>Resolved</span></div>
+              <div className="landing-update"><span className="landing-update-icon"><MessageSquare size={15} /></span><span><b>Your campus team is on it</b><small>We’ll let you know when there’s an update.</small></span><ArrowUpRight size={15} /></div>
+            </div>
+            <div className="landing-float-card"><span><CheckCircle2 size={17} /></span><div><b>Your voice matters</b><small>Every report helps.</small></div></div>
+            <div className="landing-location"><MapPin size={14} /> WOLISO CAMPUS</div>
+          </div>
+        </div>
+      </section>
+      <section className="landing-features" id="features">
+        <div className="landing-section-heading"><span className="landing-section-kicker">CAMPUSCARE, MADE FOR YOU</span><h2>Turn campus concerns into progress.</h2><p>One place to speak up, stay informed, and help improve the campus you call home.</p></div>
+        <div className="landing-feature-grid">
+          <article className="landing-feature-card"><span className="landing-feature-icon feature-blue"><ClipboardList size={20} /></span><h3>Report what needs attention</h3><p>Share campus issues with a location, details, and a photo so the right team knows where to start.</p><Link to={startPath}>Make a report <ArrowRight size={14} /></Link></article>
+          <article className="landing-feature-card"><span className="landing-feature-icon feature-green"><Clock3 size={20} /></span><h3>Follow every update</h3><p>Check your report’s status and read responses from the campus team, all in one place.</p><Link to={signInPath}>Track a report <ArrowRight size={14} /></Link></article>
+          <article className="landing-feature-card"><span className="landing-feature-icon feature-violet"><ShieldCheck size={20} /></span><h3>Speak up with confidence</h3><p>Your reports stay within the CampusCare system, with anonymous reporting available when needed.</p><a href="#how-it-works">Learn how it works <ArrowRight size={14} /></a></article>
+        </div>
+      </section>
+      <section className="landing-how" id="how-it-works">
+        <div className="landing-how-inner">
+          <div className="landing-how-copy"><span className="landing-section-kicker">SIMPLE FROM START TO FINISH</span><h2>A better campus starts with one report.</h2><p>No complicated process. Tell us what’s happening and let the campus team take it from there.</p><Link className="landing-how-link" to={startPath}>Get started today <ArrowRight size={15} /></Link></div>
+          <div className="landing-steps">
+            <article><span className="landing-step-number">01</span><div><h3>Tell us what’s wrong</h3><p>Choose a category and describe the issue. Add a location or photo to help explain.</p></div></article>
+            <article><span className="landing-step-number">02</span><div><h3>We get it to the right team</h3><p>Your report is reviewed and directed to the campus department that can help.</p></div></article>
+            <article><span className="landing-step-number">03</span><div><h3>Stay in the loop</h3><p>Follow the status and see updates as the team works toward a resolution.</p></div></article>
+          </div>
+        </div>
+      </section>
+      <section className="landing-bottom-cta"><div><span className="landing-section-kicker">YOUR CAMPUS. YOUR VOICE.</span><h2>Let’s make Woliso Campus better, together.</h2><p>Your experience matters. Start with the issue you want to see fixed.</p></div><Link className="btn landing-bottom-button" to={startPath}>Share a campus concern <ArrowRight size={16} /></Link></section>
+    </main>
+    <footer className="landing-footer"><Brand compact /><span>© {year} Ambo University · Woliso Campus</span><a href="mailto:support@ambo.edu.et">Need help? Contact support <ArrowUpRight size={13} /></a></footer>
+  </div>
+}
 function GoogleIcon() { return <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94a11.05 11.05 0 0 1-4.8 7.24l7.73 5.99c4.52-4.18 7.11-10.33 7.11-17.7Z" /><path fill="#FBBC05" d="M10.53 28.59a14.4 14.4 0 0 1 0-9.18l-7.98-6.2a23.95 23.95 0 0 0 0 21.58l7.98-6.2Z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-5.99c-2.14 1.43-4.89 2.28-8.17 2.28-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.2C6.51 42.62 14.62 48 24 48Z" /></svg> }
 function ProtectedRoute({ roles }) {
   const { user, authLoading } = useCampus()
@@ -666,10 +739,6 @@ function OutletRoutes() {
     <Route path="/admin/departments" element={user.role === 'admin' ? <DepartmentManager /> : <Navigate to="/dashboard" replace />} />
     <Route path="*" element={<Navigate to="/dashboard" replace />} />
   </Routes>
-}
-function RootRedirect() {
-  const { user } = useCampus()
-  return <Navigate to={user ? '/dashboard' : '/login'} replace />
 }
 function App() {
   const [user, setUser] = useState(null)
@@ -858,7 +927,7 @@ function App() {
     setUser(next)
   }
   const context = { user, setUser, authLoading, complaints, notifications, markNotificationsRead, addComplaint, updateComplaint, signIn, signUp, signInGoogle, signOut, theme, toggleTheme: () => setTheme((x) => x === 'light' ? 'dark' : 'light'), language, setLanguage, updateUser }
-  return <Context.Provider value={context}><Routes><Route path="/" element={<RootRedirect />} /><Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} /><Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage signup />} /><Route path="/*" element={<ProtectedRoute />} /></Routes></Context.Provider>
+  return <Context.Provider value={context}><Routes><Route path="/" element={<LandingPage />} /><Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} /><Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage signup />} /><Route path="/*" element={<ProtectedRoute />} /></Routes></Context.Provider>
 }
 
 export default App
